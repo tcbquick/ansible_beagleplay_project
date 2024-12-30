@@ -1,0 +1,17 @@
+
+---
+# add_docker_users.yml
+- name: Add users to Docker group
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Add specified users to Docker group
+      user:
+        name: "{{ item }}"
+        groups: docker
+        append: yes
+      loop:
+        - ansible
+        - arduino
+        - omada
+        - venus

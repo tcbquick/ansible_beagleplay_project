@@ -1,0 +1,34 @@
+
+---
+# deploy_nginx_website.yml
+- name: Deploy Nginx Website
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Configure Nginx
+      copy:
+        src: ./website/nginx_config.conf
+        dest: /etc/nginx/sites-available/default
+      notify: Restart Nginx
+
+    - name: Deploy index.html
+      copy:
+        src: ./website/index.html
+        dest: /var/www/html/index.html
+
+    - name: Ensure Nginx is running
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted

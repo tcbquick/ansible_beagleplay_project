@@ -1,0 +1,54 @@
+
+---
+# install_docker_and_registry.yml
+- name: Install Docker and Local Registry
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Install prerequisites
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=arm64] https://download.docker.com/linux/debian bookworm stable
+        state: present
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: latest
+
+    - name: Create Docker group and add ansible user
+      user:
+        name: ansible
+        groups: docker
+        append: yes
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Deploy local Docker registry
+      docker_container:
+        name: registry
+        image: registry:2
+        ports:
+          - "5555:5000"
+        state: started

@@ -1,0 +1,24 @@
+
+---
+# install_mail_and_cron_jobs.yml
+- name: Install mail support and configure cron jobs
+  hosts: all
+  become: true
+  tasks:
+    - name: Install mailutils
+      apt:
+        name: mailutils
+        state: present
+
+    - name: Create cron job for user home directory backups
+      cron:
+        name: "Backup home directories"
+        user: "{{ item }}"
+        minute: "1"
+        hour: "3"
+        job: "tar -czf /var/backups/{{ item }}_home_$(date +\%F).tar.gz /home/{{ item }}"
+      loop:
+        - ansible
+        - arduino
+        - omada
+        - venus
